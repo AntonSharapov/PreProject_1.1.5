@@ -30,9 +30,6 @@ public class UserDaoJDBCImpl implements UserDao {
             try{connection.close();
             } catch (SQLException e){
             }
-            try{statement.close();
-            } catch (SQLException a) {
-            }
         }
     }
 
@@ -52,11 +49,6 @@ public class UserDaoJDBCImpl implements UserDao {
                 connection.close();
             } catch (SQLException e) {
             }
-            try {
-                statement.close();
-            } catch (SQLException a) {
-            }
-
         }
     }
 
@@ -66,23 +58,26 @@ public class UserDaoJDBCImpl implements UserDao {
         String query = "INSERT INTO ITEM(name, lastName, age) VALUES (?, ?, ?)";
         try {
             statement = connection.prepareStatement(query);
+            connection.setAutoCommit(false);
             statement.setString(1, name);
             statement.setString(2, lastName);
             statement.setInt(3,age);
 
             statement.executeUpdate();
+            connection.commit();
             System.out.println("User с именем – " + name +" добавлен в базу данных" );
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             System.err.println("Таблица не удалилась ! ");
             e.printStackTrace();
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-            }
-            try {
-                statement.close();
-            } catch (SQLException a) {
             }
         }
 
@@ -94,22 +89,25 @@ public class UserDaoJDBCImpl implements UserDao {
         String query = "DELETE FROM ITEM WHERE id = ?";
         try {
             statement = connection.prepareStatement(query);
+            connection.setAutoCommit(false);
             statement.setLong(1, id);
 
 
             statement.executeUpdate();
+            connection.commit();
             System.out.println("Data has been removed");
         } catch (SQLException e) {
-            System.err.println("Таблица не удалилась ! ");
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            System.err.println("Таблица не удалилась !");
             e.printStackTrace();
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-            }
-            try {
-                statement.close();
-            } catch (SQLException a) {
             }
         }
     }
@@ -121,6 +119,7 @@ public class UserDaoJDBCImpl implements UserDao {
         String query = "SELECT id, name, lastName, age from ITEM";
         try {
             statement = connection.createStatement();
+            connection.setAutoCommit(false);
             ResultSet resultSet = statement.executeQuery(query);
             while (resultSet.next()) {
                 User us = new User();
@@ -129,22 +128,24 @@ public class UserDaoJDBCImpl implements UserDao {
                 us.setLastName(resultSet.getString("lastName"));
                 us.setAge(resultSet.getByte("age"));
                 userList.add(us);
+                connection.commit();
                 for(User element : userList){
                     System.out.println(element.toString());
                 }
             }
 
         } catch (SQLException e) {
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
             System.err.println("Таблица не удалилась ! ");
             e.printStackTrace();
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-            }
-            try {
-                statement.close();
-            } catch (SQLException a) {
             }
         }
         return userList;
@@ -156,19 +157,22 @@ public class UserDaoJDBCImpl implements UserDao {
         String query = "DELETE FROM ITEM";
         try {
             statement = connection.createStatement();
+            connection.setAutoCommit(false);
             statement.executeUpdate(query);
+            connection.commit();
             System.out.println("Database has been Cleared!");
         } catch (SQLException e) {
-            System.err.println("Таблица не удалилась ! ");
+            try {
+                connection.rollback();
+            } catch (SQLException ex) {
+                throw new RuntimeException(ex);
+            }
+            System.err.println("Таблица не удалилась !");
             e.printStackTrace();
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-            }
-            try {
-                statement.close();
-            } catch (SQLException a) {
             }
         }
     }
