@@ -16,7 +16,10 @@ public class Main {
         dv.saveUser("ko", "Sopo", (byte)16);
         dv.saveUser("mo", "Vopo", (byte)17);
         dv.getAllUsers();
+        dv.removeUserById(2);
+        dv.getAllUsers();
         dv.cleanUsersTable();
         dv.dropUsersTable();
+
     }
 }
